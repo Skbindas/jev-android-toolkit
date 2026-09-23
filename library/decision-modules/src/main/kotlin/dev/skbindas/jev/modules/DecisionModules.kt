@@ -4,6 +4,7 @@ import dev.skbindas.jev.client.JevClient
 import dev.skbindas.jev.core.Decision
 import dev.skbindas.jev.core.DecisionPolicy
 import dev.skbindas.jev.core.JevQuestions
+import dev.skbindas.jev.core.score
 
 enum class PaywallAction { SHOW, DEFER, SUPPRESS }
 
