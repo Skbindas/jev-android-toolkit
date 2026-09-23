@@ -5,6 +5,7 @@ import dev.skbindas.jev.core.JevQuestions
 import dev.skbindas.jev.core.JevRequest
 import java.net.InetSocketAddress
 import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -12,7 +13,7 @@ import kotlin.test.assertTrue
 
 class HttpJevTransportContractTest {
     @Test
-    fun posts_typed_request_and_parses_response() {
+    fun posts_typed_request_and_parses_response() = runTest {
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
         server.createContext("/v1/systemone") { exchange ->
             assertEquals("Bearer test-key", exchange.requestHeaders.getFirst("Authorization"))
@@ -42,7 +43,7 @@ class HttpJevTransportContractTest {
     }
 
     @Test
-    fun non_success_response_is_exposed_as_an_exception() {
+    fun non_success_response_is_exposed_as_an_exception() = runTest {
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
         server.createContext("/error") { exchange ->
             val body = "rate limited".toByteArray(StandardCharsets.UTF_8)
