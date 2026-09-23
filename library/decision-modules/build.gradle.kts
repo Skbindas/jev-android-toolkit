@@ -11,7 +11,7 @@ dependencies {
     api(project(":library:decision-core"))
     api(project(":library:jev-client"))
     testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
 }
 
 kotlin {
