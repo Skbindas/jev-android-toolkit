@@ -53,4 +53,34 @@ class DecisionPolicyTest {
         val accepted = policy.accept(NoulDecision(0.85))
         assertEquals(true, (accepted as Decision.Accepted).value)
     }
+
+    @Test
+    fun noul_does_not_clamp_invalid_probability() {
+        val result = DecisionPolicy().accept(NoulDecision(2.0))
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("noul_invalid_probability", result.reason)
+    }
+
+    @Test
+    fun score_rejects_values_outside_the_question_contract() {
+        val result = DecisionPolicy().accept(ScoreDecision(11, 0.95))
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("score_out_of_range", result.reason)
+    }
+
+    @Test
+    fun choice_rejects_invalid_probabilities() {
+        val result = DecisionPolicy().accept(
+            ChoiceDecision(
+                key = "show",
+                confidence = 0.95,
+                probabilities = mapOf("show" to 1.2, "defer" to -0.2)
+            )
+        )
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("decision_invalid_probability", result.reason)
+    }
 }
