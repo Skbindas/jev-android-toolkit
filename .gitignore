@@ -1,26 +1,19 @@
 # Gradle
 .gradle/
+build/
 **/build/
-!**/src/**/build/
 
-# Android / IntelliJ
+# Kotlin project data
+.kotlin/
+
+# Android
+local.properties
+
+# IDE
 .idea/
 *.iml
-local.properties
-.externalNativeBuild/
-.cxx/
-captures/
 
 # Secrets
 .env
-.env.*
-!.env.example
 *.jks
 *.keystore
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Generated
-.kotlin/
