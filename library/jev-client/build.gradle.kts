@@ -19,7 +19,24 @@ kotlin {
 publishing {
     publications {
         create<MavenPublication>("release") {
+            artifactId = "jev-client"
             from(components["java"])
+            pom {
+                name.set("Jev Android Toolkit - jev-client")
+                description.set("Kotlin client transport for TypeSafe Jev decision requests.")
+                url.set("https://github.com/Skbindas/jev-android-toolkit")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/license/mit")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/Skbindas/jev-android-toolkit")
+                    connection.set("scm:git:https://github.com/Skbindas/jev-android-toolkit.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/Skbindas/jev-android-toolkit.git")
+                }
+            }
         }
     }
 }
