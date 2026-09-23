@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "dev.skbindas.jev.sample"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.skbindas.jev.sample"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
     }
