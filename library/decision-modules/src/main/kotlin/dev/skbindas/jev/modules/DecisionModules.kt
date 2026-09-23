@@ -63,8 +63,7 @@ class ModerationDecider(
 ) {
     suspend fun decide(context: ModerationContext): Decision<ModerationAction> {
         val raw = jev.choice(
-            state = "text=" + context.text + "
-trustedAuthor=" + context.trustedAuthor,
+            state = "text=" + context.text + "\ntrustedAuthor=" + context.trustedAuthor,
             questionId = "moderation_action",
             instructions = "Classify the content for a user-generated-content moderation workflow.",
             criteria = mapOf(
@@ -104,12 +103,9 @@ class NotificationRouter(
 
         val raw = jev.choice(
             state = "title=" + context.title +
-                "
-body=" + context.body +
-                "
-active=" + context.userActiveNow +
-                "
-priority=" + context.priority,
+                "\nbody=" + context.body +
+                "\nactive=" + context.userActiveNow +
+                "\npriority=" + context.priority,
             questionId = "notification_action",
             instructions = "Choose the least disruptive notification route that still preserves useful information.",
             criteria = mapOf(
@@ -135,10 +131,17 @@ data class SearchCandidate(
     val text: String
 )
 
+enum class RankingStatus {
+    RANKED,
+    ABSTAINED
+}
+
 data class RankedCandidate(
     val candidate: SearchCandidate,
-    val score: Int,
-    val confidence: Double
+    val score: Int?,
+    val confidence: Double,
+    val status: RankingStatus,
+    val abstainReason: String? = null
 )
 
 class SemanticReranker(
@@ -177,12 +180,26 @@ class SemanticReranker(
         val response = jev.evaluate(state, questions)
         return candidates.mapIndexedNotNull { index, candidate ->
             val raw = response.score("fit_" + index) ?: return@mapIndexedNotNull null
-            val score = when (val decision = policy.accept(raw)) {
-                is Decision.Accepted -> decision.value
-                is Decision.Abstained -> raw.score
+
+            when (val decision = policy.accept(raw)) {
+                is Decision.Accepted -> RankedCandidate(
+                    candidate = candidate,
+                    score = decision.value,
+                    confidence = decision.confidence,
+                    status = RankingStatus.RANKED
+                )
+                is Decision.Abstained -> RankedCandidate(
+                    candidate = candidate,
+                    score = null,
+                    confidence = decision.confidence ?: 0.0,
+                    status = RankingStatus.ABSTAINED,
+                    abstainReason = decision.reason
+                )
             }
-            RankedCandidate(candidate, score, raw.confidence)
-        }.sortedByDescending { it.score }
+        }.sortedWith(
+            compareByDescending<RankedCandidate> { it.score != null }
+                .thenByDescending { it.score ?: Int.MIN_VALUE }
+        )
     }
 }
 
@@ -192,8 +209,7 @@ class VerificationDecider(
 ) {
     suspend fun verify(expected: String, observed: String): Decision<Boolean> {
         val raw = jev.noul(
-            state = "expected=" + expected + "
-observed=" + observed,
+            state = "expected=" + expected + "\nobserved=" + observed,
             questionId = "verified",
             instructions = "Determine whether the observed outcome satisfies the expected outcome."
         ) ?: return Decision.Abstained("missing_jev_answer")
