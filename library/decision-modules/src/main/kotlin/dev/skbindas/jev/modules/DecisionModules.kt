@@ -181,8 +181,8 @@ class SemanticReranker(
         return candidates.mapIndexedNotNull { index, candidate ->
             val raw = response.score("fit_" + index) ?: return@mapIndexedNotNull null
 
-            when (val decision = policy.accept(raw)) {
-                is Decision.Accepted -> RankedCandidate(
+            when (val decision: Decision<Int> = policy.accept(raw)) {
+                is Decision.Accepted<Int> -> RankedCandidate(
                     candidate = candidate,
                     score = decision.value,
                     confidence = decision.confidence,
