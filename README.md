@@ -1,87 +1,118 @@
 # Jev Android Toolkit
 
-Kotlin-first decision modules for Android, powered by TypeSafe Jev.
+[![CI](https://github.com/Skbindas/jev-android-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Skbindas/jev-android-toolkit/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/Skbindas/jev-android-toolkit)](LICENSE)
 
-Jev Android Toolkit turns fuzzy product decisions into bounded typed judgments that normal application code can gate, verify, and act on. The toolkit is built around a strict boundary: Jev handles semantic uncertainty; application code owns consequences and side effects.
+**Kotlin-first Android decision modules powered by TypeSafe Jev** for paywall timing, UGC moderation, notification routing, semantic search reranking, and verification.
 
-## Included
+Jev Android Toolkit helps Android developers turn fuzzy product questions into **bounded, typed semantic decisions**. Deterministic Kotlin code remains responsible for permissions, payments, persistence, network side effects, and irreversible actions.
 
-| Module | Jev decides | Deterministic code owns |
+## Why this project
+
+Most AI integrations stop at an untyped model wrapper. This toolkit focuses on the layer that Android applications actually need: **decision contracts, confidence gates, fallbacks, verification, and reusable Kotlin modules**.
+
+Use it when your Android app needs an AI-assisted decision such as:
+
+- Should this user see a paywall now, later, or not at all?
+- Should user-generated content be allowed, reviewed, or rejected?
+- Should a notification be delivered immediately, digested, or suppressed?
+- Which search candidates are semantically most relevant?
+- Does an observed result satisfy an expected outcome?
+
+## Modules
+
+| Module | Semantic decision | Deterministic boundary |
 | --- | --- | --- |
-| Paywall | show / defer / suppress | entitlement checks, pricing, purchases |
-| Moderation | allow / review / reject | policy storage, user actions, enforcement |
-| Notifications | deliver / digest / suppress | scheduling and notification APIs |
-| Search reranking | candidate relevance scores | retrieval and final list handling |
-| Verification | whether an observed result satisfies an expectation | actual mutation/action |
+| **Paywall** | show / defer / suppress | entitlement, pricing, purchase execution |
+| **Moderation** | allow / review / reject | policy enforcement and user actions |
+| **Notifications** | deliver / digest / suppress | Android notification APIs and scheduling |
+| **Search reranking** | bounded relevance scores | retrieval, pagination, final result handling |
+| **Verification** | observed outcome satisfies expectation | actual mutation and state verification |
 
-A Jetpack Compose playground demonstrates the modules without requiring a live API key.
+## Architecture
 
-## Design
-
-    Observe
+```text
+Android app state
       |
       v
-    Typed Jev judgment
+Typed Jev decision
       |
       v
-    Confidence / policy gate
+Confidence + policy gate
+      |
+      +---- low confidence ----> ABSTAIN / fallback
       |
       v
-    Deterministic action
+Deterministic Kotlin action
       |
       v
-    Verification
+Verification / telemetry
+```
 
-Jev handles semantic judgment. Code handles side effects.
+**Rule:** Jev decides semantics. Kotlin decides consequences.
 
-## Live Jev
-
-The client targets the TypeSafe System One API.
-
-    POST https://api.typesafe.ai/v1/systemone
-
-Authentication uses a Bearer API key. The repository does not store keys and the sample's default demo uses a fake transport.
-
-For production Android apps, do not ship a long-lived server credential inside the APK. Put live Jev access behind a trusted backend or proxy when the key cannot safely be contained on-device.
+Money, dates, permissions, persistence, authentication, payment execution, account changes, arbitrary device actions, and irreversible side effects stay outside the model.
 
 ## Quick start
 
-Install JDK 17 and Gradle 9.6.0.
+Requirements:
 
-    gradle test
-    gradle :sample:compose-playground:assembleDebug
+- JDK 17
+- Gradle 9.6.0
+- Android SDK / API 37 for the sample
 
-The libraries are intentionally small and use standard Maven publishing configuration so they can later be released independently.
+```bash
+gradle test
+gradle :sample:compose-playground:assembleDebug
+```
 
-## Why this is not an agent wrapper
+The Compose playground runs its default decision example with a fake transport, so no API key is required for local tests.
 
-The toolkit does not ask Jev for free-form instructions and then execute them. The decision surface is typed and bounded, followed by a local policy gate and deterministic application behavior.
+## Live TypeSafe Jev
 
-The semantic modules also batch multi-question work where it is useful. For example, search reranking evaluates a bounded candidate set in one Jev request instead of making one network request per candidate.
+The client targets the TypeSafe System One API:
 
-## Research basis
+```text
+POST https://api.typesafe.ai/v1/systemone
+Authorization: Bearer <server-side-key>
+```
 
-The initial design was informed by public Jev Android/mobile projects and the awesome-jev contribution rules. Useful patterns include bounded action spaces, fresh state before acting, explicit confidence thresholds, verification, durable fixtures, and human fallback.
+Do **not** ship a long-lived TypeSafe API key inside an Android APK. Production apps should use a trusted backend or proxy when the credential cannot safely remain on-device.
 
-The implementation in this repository is independently authored. No implementation source was copied from the referenced projects. See docs/research-notes.md.
+## Search and discovery
 
-## Contribution quality bar
+This repository intentionally uses the terms Android, Kotlin, Jetpack Compose, TypeSafe Jev, decision engine, AI decision modules, semantic ranking, UGC moderation, notification routing, paywall decisions, and verification because they describe the actual project.
 
-A PR needs more than a green build. Reviewers check:
+The README is written for both developers discovering the project on GitHub and developers searching the web for reusable Android decision components. It does not use unrelated keyword stuffing.
 
-- decision boundary quality
-- fallback and abstain behavior
-- tests and regression fixtures
-- dependency and security impact
-- documentation
-- reproducibility of benchmark claims
-- independent implementation
+## Community-inspired, independently implemented
 
-AI-assisted development is welcome and substantial AI generation should be disclosed.
+The architecture was informed by public Jev Android/mobile projects and the `awesome-jev` contribution rules. Patterns studied include bounded actions, fresh-state validation, confidence thresholds, verification, durable fixtures, and human fallback.
+
+**No implementation source was copied.** See [research notes](docs/research-notes.md).
+
+## Contributing
+
+Focused pull requests are welcome.
+
+Every decision module should define:
+
+1. the exact semantic decision Jev owns;
+2. the deterministic boundary;
+3. confidence / abstain behavior;
+4. runnable tests;
+5. fallback behavior;
+6. security and dependency impact.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Security
+
+Never commit API keys, signing keys, backend credentials, or tokens. See [SECURITY.md](SECURITY.md).
 
 ## Project status
 
-The initial implementation and CI validation are complete. Repository visibility is managed separately from the codebase.
+The initial implementation and CI validation are complete. The repository is actively maintained and remains open to focused, reproducible contributions.
 
 ## License
 
