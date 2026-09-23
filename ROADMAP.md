@@ -12,9 +12,9 @@ Jev Android Toolkit is intentionally focused on safe, bounded semantic decisioni
 
 ## Medium term
 
-- [ ] Publish versioned API documentation.
-- [ ] Add benchmark fixtures with reproducible methodology and no synthetic marketing claims.
-- [ ] Add optional integration tests for the live Jev transport.
+- [x] Publish versioned API documentation.
+- [x] Add benchmark fixtures with reproducible methodology and no synthetic marketing claims.
+- [x] Add deterministic HTTP transport contract tests; keep live API tests optional and credential-gated.
 - [ ] Improve contributor examples and issue triage.
 
 ## Long term

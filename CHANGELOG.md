@@ -4,6 +4,9 @@ All notable changes to Jev Android Toolkit are documented here.
 
 ## [Unreleased]
 
+- Added a versioned 0.1.0 API reference and deterministic benchmark fixtures.
+- Added a local HTTP contract test for `HttpJevTransport` without requiring a live credential.
+
 - Added automatic Gradle dependency-graph submission for the main branch.
 - Refreshed GitHub Actions toolchain usage to current major action lines.
 - Added Maven publication smoke testing with sources and Javadoc artifacts.

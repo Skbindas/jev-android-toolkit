@@ -1,0 +1,23 @@
+[
+  {
+    "name": "accepted_choice",
+    "key": "show",
+    "confidence": 0.92,
+    "probabilities": { "show": 0.92, "defer": 0.05, "suppress": 0.03 },
+    "expected": "accepted"
+  },
+  {
+    "name": "low_margin_choice",
+    "key": "show",
+    "confidence": 0.71,
+    "probabilities": { "show": 0.71, "defer": 0.66, "suppress": 0.01 },
+    "expected": "abstained"
+  },
+  {
+    "name": "invalid_probability_choice",
+    "key": "show",
+    "confidence": 0.95,
+    "probabilities": { "show": 1.2, "defer": -0.2 },
+    "expected": "abstained"
+  }
+]
