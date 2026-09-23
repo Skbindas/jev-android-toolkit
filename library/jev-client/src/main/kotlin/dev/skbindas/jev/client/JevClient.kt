@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -83,10 +82,14 @@ class HttpJevTransport(
             }
 
             val status = connection.responseCode
-            val body = (if (status in 200..299) connection.inputStream else connection.errorStream)
-                .use { stream ->
-                    BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).readText()
-                }
+            val stream = if (status in 200..299) {
+                connection.inputStream
+            } else {
+                connection.errorStream ?: connection.inputStream
+            }
+            val body = stream.use {
+                BufferedReader(InputStreamReader(it, Charsets.UTF_8)).readText()
+            }
 
             if (status !in 200..299) {
                 error("TypeSafe API returned HTTP " + status + ": " + body)
