@@ -35,6 +35,6 @@ jobs:
           build-mode: manual
 
       - name: Build JVM and Android targets for CodeQL
-        run: gradle :library:decision-core:classes :library:jev-client:classes :library:decision-modules:classes :sample:compose-playground:assembleDebug
+        run: gradle --no-daemon --no-build-cache -Dkotlin.compiler.execution.strategy=in-process clean :library:decision-core:classes :library:jev-client:classes :library:decision-modules:classes :sample:compose-playground:assembleDebug
 
       - uses: github/codeql-action/analyze@v4
