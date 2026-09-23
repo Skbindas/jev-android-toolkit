@@ -1,0 +1,97 @@
+name: Maven Central Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "Verified Maven Central namespace prefix"
+        required: true
+        default: "dev.skbindas"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maven-central-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Validate and stage Maven Central release
+    runs-on: ubuntu-latest
+    environment:
+      name: maven-central
+      url: https://central.sonatype.com/publishing/deployments
+    env:
+      CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
+      MAVEN_CENTRAL_SIGNING_KEY: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
+      MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+      CENTRAL_NAMESPACE: ${{ inputs.namespace }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "9.6.0"
+
+      - name: Require a version tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF_TYPE}" != "tag" ]]; then
+            echo "Release workflow must run from a version tag such as v0.1.0."
+            exit 1
+          fi
+          expected_version="${GITHUB_REF_NAME#v}"
+          declared_version="$(sed -nE 's/^version = "([^"]+)"/\\1/p' build.gradle.kts | head -n1)"
+          if [[ "$expected_version" != "$declared_version" ]]; then
+            echo "Tag version $expected_version does not match build version $declared_version."
+            exit 1
+          fi
+
+      - name: Validate Central namespace prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          group_id="$(sed -nE 's/^group = "([^"]+)"/\\1/p' build.gradle.kts | head -n1)"
+          case "$group_id" in
+            "${CENTRAL_NAMESPACE}"|"${CENTRAL_NAMESPACE}".*) ;;
+            *) echo "Group ID $group_id is not under namespace $CENTRAL_NAMESPACE."; exit 1 ;;
+          esac
+
+      - name: Validate required release credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CENTRAL_TOKEN" || { echo "Missing CENTRAL_TOKEN."; exit 1; }
+          test -n "$MAVEN_CENTRAL_SIGNING_KEY" || { echo "Missing MAVEN_CENTRAL_SIGNING_KEY."; exit 1; }
+          test -n "$MAVEN_CENTRAL_SIGNING_PASSWORD" || { echo "Missing MAVEN_CENTRAL_SIGNING_PASSWORD."; exit 1; }
+
+      - name: Run release test suite
+        run: gradle test
+
+      - name: Assemble Android sample
+        run: gradle :sample:compose-playground:assembleDebug
+
+      - name: Publish signed artifacts to Central staging API
+        run: gradle --no-parallel publish
+
+      - name: Transfer staging repository to Central Publisher Portal
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $CENTRAL_TOKEN" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${CENTRAL_NAMESPACE}?publishing_type=user_managed")"
+          echo "Central Publisher Portal deployment response:"
+          echo "$response"
+          echo "Inspect validation at https://central.sonatype.com/publishing/deployments"
