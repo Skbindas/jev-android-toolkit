@@ -79,6 +79,32 @@ class DecisionModulesTest {
         assertEquals(1, calls)
         assertEquals(3, questionCount)
         assertEquals("b", result.first().candidate.id)
+        assertEquals(RankingStatus.RANKED, result.first().status)
+    }
+
+    @Test
+    fun reranker_preserves_low_confidence_candidates_as_abstained() = runTest {
+        val client = JevClient(
+            JevTransport {
+                JevResponse(
+                    answers = mapOf(
+                        "fit_0" to buildJsonObject {
+                            put("score", 6)
+                            put("confidence", 0.51)
+                        }
+                    )
+                )
+            }
+        )
+
+        val result = SemanticReranker(client).rerank(
+            "ambiguous query",
+            listOf(SearchCandidate("a", "Maybe", "uncertain match"))
+        )
+
+        assertEquals(RankingStatus.ABSTAINED, result.single().status)
+        assertEquals(null, result.single().score)
+        assertEquals("score_confidence_below_threshold", result.single().abstainReason)
     }
 
     @Test

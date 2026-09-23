@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.intOrNull
 
 @Serializable
 data class JevRequest(
@@ -49,23 +51,27 @@ sealed interface Decision<out T> {
 fun JevResponse.choice(questionId: String): ChoiceDecision? {
     val answer = answers[questionId] ?: return null
     val key = answer["choice"]?.toString()?.trim('"') ?: return null
-    val confidence = answer["confidence"]?.toString()?.toDoubleOrNull() ?: 0.0
+    val confidence = answer["confidence"]?.jsonPrimitive?.doubleOrNull ?: 0.0
     val probabilities = answer["probabilities"]
         ?.jsonObject
-        ?.mapValues { (_, value) -> value.jsonPrimitive.double }
+        ?.mapNotNull { (choice, value) ->
+            value.jsonPrimitive.doubleOrNull?.let { choice to it }
+        }
+        ?.toMap()
         ?: emptyMap()
+
     return ChoiceDecision(key, confidence, probabilities)
 }
 
 fun JevResponse.score(questionId: String): ScoreDecision? {
     val answer = answers[questionId] ?: return null
-    val score = answer["score"]?.toString()?.toIntOrNull() ?: return null
-    val confidence = answer["confidence"]?.toString()?.toDoubleOrNull() ?: 0.0
+    val score = answer["score"]?.jsonPrimitive?.intOrNull ?: return null
+    val confidence = answer["confidence"]?.jsonPrimitive?.doubleOrNull ?: 0.0
     return ScoreDecision(score, confidence)
 }
 
 fun JevResponse.noul(questionId: String): NoulDecision? {
     val answer = answers[questionId] ?: return null
-    val probability = answer["noul"]?.toString()?.toDoubleOrNull() ?: return null
+    val probability = answer["noul"]?.jsonPrimitive?.doubleOrNull ?: return null
     return NoulDecision(probability)
 }
