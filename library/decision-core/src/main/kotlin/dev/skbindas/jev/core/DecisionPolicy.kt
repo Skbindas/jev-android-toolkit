@@ -18,6 +18,14 @@ data class DecisionPolicy(
             .maxOrNull()
             ?: 0.0
 
+        if (selectedProbability !in 0.0..1.0 || choice.confidence !in 0.0..1.0 ||
+            choice.probabilities.values.any { it !in 0.0..1.0 }) {
+            return Decision.Abstained(
+                reason = "decision_invalid_probability",
+                confidence = null
+            )
+        }
+
         val confidenceOk = selectedProbability >= minimumConfidence
         val marginOk = choice.probabilities.isEmpty() ||
             (selectedProbability - runnerUp) >= minimumMargin
@@ -36,15 +44,33 @@ data class DecisionPolicy(
         }
     }
 
-    fun accept(score: ScoreDecision): Decision<Int> =
-        if (score.confidence >= minimumConfidence) {
+    fun accept(score: ScoreDecision): Decision<Int> {
+        if (score.score !in 2..10) {
+            return Decision.Abstained(
+                reason = "score_out_of_range",
+                confidence = score.confidence
+            )
+        }
+        if (score.confidence !in 0.0..1.0) {
+            return Decision.Abstained(
+                reason = "score_invalid_confidence",
+                confidence = null
+            )
+        }
+
+        return if (score.confidence >= minimumConfidence) {
             Decision.Accepted(score.score, score.confidence)
         } else {
             Decision.Abstained("score_confidence_below_threshold", score.confidence)
         }
+    }
 
     fun accept(noul: NoulDecision): Decision<Boolean> {
-        val probability = noul.probability.coerceIn(0.0, 1.0)
+        if (noul.probability !in 0.0..1.0) {
+            return Decision.Abstained("noul_invalid_probability", null)
+        }
+
+        val probability = noul.probability
         val confidence = maxOf(probability, 1.0 - probability)
 
         return if (confidence >= minimumConfidence) {

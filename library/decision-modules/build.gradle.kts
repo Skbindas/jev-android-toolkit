@@ -14,7 +14,19 @@ kotlin {
     jvmToolchain(17)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
+    repositories {
+        maven {
+            name = "localValidation"
+            url = uri(layout.buildDirectory.dir("publishing-validation"))
+        }
+    }
+
     publications {
         create<MavenPublication>("release") {
             artifactId = "decision-modules"

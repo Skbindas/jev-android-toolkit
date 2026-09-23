@@ -31,6 +31,29 @@ class DecisionModulesTest {
     }
 
     @Test
+    fun paywall_unknown_choice_abstains() = runTest {
+        val client = JevClient(
+            JevTransport {
+                JevResponse(
+                    answers = mapOf(
+                        "paywall_action" to buildJsonObject {
+                            put("choice", "unexpected")
+                            put("confidence", 0.99)
+                        }
+                    )
+                )
+            }
+        )
+
+        val result = PaywallDecider(client).decide(
+            PaywallContext(3, 2, false, false)
+        )
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("unexpected_jev_choice", result.reason)
+    }
+
+    @Test
     fun high_priority_notifications_bypass_semantic_suppression() = runTest {
         var calls = 0
         val client = JevClient(
@@ -46,6 +69,29 @@ class DecisionModulesTest {
 
         assertEquals(NotificationAction.DELIVER, (result as Decision.Accepted).value)
         assertEquals(0, calls)
+    }
+
+    @Test
+    fun notification_unknown_choice_abstains() = runTest {
+        val client = JevClient(
+            JevTransport {
+                JevResponse(
+                    answers = mapOf(
+                        "notification_action" to buildJsonObject {
+                            put("choice", "unexpected")
+                            put("confidence", 0.99)
+                        }
+                    )
+                )
+            }
+        )
+
+        val result = NotificationRouter(client).decide(
+            NotificationContext("Update", "Body", false, 1)
+        )
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("unexpected_jev_choice", result.reason)
     }
 
     @Test
@@ -108,6 +154,20 @@ class DecisionModulesTest {
     }
 
     @Test
+    fun reranker_preserves_missing_answers_as_abstained_candidates() = runTest {
+        val client = JevClient(JevTransport { JevResponse() })
+
+        val result = SemanticReranker(client).rerank(
+            "missing answer",
+            listOf(SearchCandidate("a", "Maybe", "no model answer"))
+        )
+
+        assertEquals(1, result.size)
+        assertEquals(RankingStatus.ABSTAINED, result.single().status)
+        assertEquals("missing_jev_answer", result.single().abstainReason)
+    }
+
+    @Test
     fun moderation_supports_human_review() = runTest {
         val response = JevResponse(
             answers = mapOf(
@@ -128,5 +188,39 @@ class DecisionModulesTest {
 
         assertIs<Decision.Accepted<ModerationAction>>(result)
         assertEquals(ModerationAction.REVIEW, result.value)
+    }
+
+    @Test
+    fun moderation_unknown_choice_abstains() = runTest {
+        val client = JevClient(
+            JevTransport {
+                JevResponse(
+                    answers = mapOf(
+                        "moderation_action" to buildJsonObject {
+                            put("choice", "unexpected")
+                            put("confidence", 0.99)
+                        }
+                    )
+                )
+            }
+        )
+
+        val result = ModerationDecider(client).decide(ModerationContext("unexpected"))
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("unexpected_jev_choice", result.reason)
+    }
+
+    @Test
+    fun verification_uses_abstention_for_missing_or_uncertain_result() = runTest {
+        val client = JevClient(JevTransport { JevResponse() })
+
+        val result = VerificationDecider(client).verify(
+            expected = "payment confirmed",
+            observed = "payment pending"
+        )
+
+        assertIs<Decision.Abstained>(result)
+        assertEquals("missing_jev_answer", result.reason)
     }
 }

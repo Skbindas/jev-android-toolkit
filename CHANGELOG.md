@@ -4,9 +4,14 @@ All notable changes to Jev Android Toolkit are documented here.
 
 ## [Unreleased]
 
-- Improve release and publishing documentation.
-- Expand developer discovery documentation, including a concise Hindi getting-started guide.
-- Continue CI, CodeQL, and dependency-security hardening.
+- Added automatic Gradle dependency-graph submission for the main branch.
+- Refreshed GitHub Actions toolchain usage to current major action lines.
+- Added Maven publication smoke testing with sources and Javadoc artifacts.
+- Hardened decision policies against malformed probabilities, invalid scores, and invalid NOUL probabilities.
+- Preserved explicit abstention for missing or unexpected module decisions.
+- Expanded the offline Compose playground to cover all decision modules.
+- Added backend authentication and reproducible fixture documentation.
+- Recorded the tested toolchain in `docs/compatibility.md`.
 
 ## [0.1.0] - 2026-09-23
 

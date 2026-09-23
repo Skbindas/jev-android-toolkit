@@ -51,7 +51,7 @@ Verification / telemetry
 
 **Rule:** Jev decides semantics. Kotlin decides consequences.
 
-Money, dates, permissions, persistence, authentication, payment execution, account changes, arbitrary device actions, and irreversible side effects stay outside the model.
+Money, dates, permissions, persistence, authentication, payment execution, account changes, and irreversible side effects stay outside the model.
 
 ## Quick start
 
@@ -79,6 +79,26 @@ Authorization: Bearer <server-side-key>
 
 Do **not** ship a long-lived TypeSafe API key inside an Android APK. Production apps should use a trusted backend or proxy when the credential cannot safely remain on-device.
 
+## Maven artifacts
+
+The three library modules are configured for Maven publication:
+
+```text
+dev.skbindas.jev:decision-core:0.1.0
+dev.skbindas.jev:jev-client:0.1.0
+dev.skbindas.jev:decision-modules:0.1.0
+```
+
+These coordinates are the project's intended release coordinates. A public Maven Central release is not claimed until the artifacts are signed, published, and verified from a clean consumer project.
+
+## Backend authentication
+
+For production Android apps, keep the long-lived TypeSafe credential behind a trusted backend or proxy. The repository includes a reference flow in [backend authentication](docs/backend-auth.md).
+
+## Reproducible integration fixtures
+
+Module contract tests inject `JevTransport` with deterministic fake responses. The same fixture pattern is used for paywall, moderation, notification routing, semantic reranking, and verification without requiring a live API key. See [integration fixtures](docs/integration-fixtures.md).
+
 ## Search and discovery
 
 This repository intentionally uses the terms Android, Kotlin, Jetpack Compose, TypeSafe Jev, decision engine, AI decision modules, semantic ranking, UGC moderation, notification routing, paywall decisions, and verification because they describe the actual project.
@@ -93,9 +113,12 @@ The architecture was informed by public Jev Android/mobile projects and the `awe
 
 ## Documentation
 
+- [Architecture](docs/architecture.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 - [Publishing and release readiness](docs/publishing.md)
+- [Backend authentication](docs/backend-auth.md)
+- [Integration fixtures](docs/integration-fixtures.md)
 - [Hindi quick guide](docs/i18n/hi/README.md)
 
 ## Contributing
@@ -119,8 +142,9 @@ Never commit API keys, signing keys, backend credentials, or tokens. See [SECURI
 
 ## Project status
 
-The initial implementation and CI validation are complete. The repository is actively maintained and remains open to focused, reproducible contributions.
+The toolkit foundation is implemented with JVM tests, Android sample validation, static CodeQL analysis, dependency review, Maven publication smoke testing, and offline contract fixtures.
 
 ## License
 
 MIT.
+
