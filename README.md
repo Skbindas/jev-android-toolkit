@@ -91,6 +91,13 @@ The architecture was informed by public Jev Android/mobile projects and the `awe
 
 **No implementation source was copied.** See [research notes](docs/research-notes.md).
 
+## Documentation
+
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
+- [Publishing and release readiness](docs/publishing.md)
+- [Hindi quick guide](docs/i18n/hi/README.md)
+
 ## Contributing
 
 Focused pull requests are welcome.
