@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: "Jev Android Toolkit"
+message: "If you use this toolkit in research or software, please cite the repository."
+type: software
+authors:
+  - family-names: "Choudhary"
+    given-names: "Suhaib"
+repository-code: "https://github.com/Skbindas/jev-android-toolkit"
+url: "https://github.com/Skbindas/jev-android-toolkit"
+license: "MIT"
+keywords:
+  - android
+  - kotlin
+  - jetpack-compose
+  - typesafe
+  - jev
+  - ai
+  - decision-engine
+  - semantic-ranking
+  - moderation
+  - notifications
+  - paywall
