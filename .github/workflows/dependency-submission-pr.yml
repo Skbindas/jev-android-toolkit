@@ -1,0 +1,42 @@
+name: Dependency Submission PR
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  same-repository:
+    name: Generate and submit PR dependency graph
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v6
+        with:
+          gradle-version: "9.6.0"
+          dependency-graph: generate-and-submit
+
+  fork:
+    name: Generate PR dependency graph artifact
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Generate and upload dependency graph
+        uses: gradle/actions/dependency-submission@v6
+        with:
+          gradle-version: "9.6.0"
+          dependency-graph: generate-and-upload
