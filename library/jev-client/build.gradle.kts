@@ -1,5 +1,5 @@
-import org.gradle.api.credentials.HttpHeaderAuthentication
 import org.gradle.api.credentials.HttpHeaderCredentials
+import org.gradle.authentication.http.HttpHeaderAuthentication
 
 plugins {
     kotlin("jvm")
