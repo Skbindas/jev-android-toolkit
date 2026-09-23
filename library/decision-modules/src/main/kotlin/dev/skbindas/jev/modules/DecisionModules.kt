@@ -38,11 +38,12 @@ class PaywallDecider(
             )
         ) ?: return Decision.Abstained("missing_jev_answer")
 
-        return policy.accept(raw).mapValue {
+        return policy.accept(raw).mapValueOrAbstain {
             when (it) {
                 "show" -> PaywallAction.SHOW
                 "defer" -> PaywallAction.DEFER
-                else -> PaywallAction.SUPPRESS
+                "suppress" -> PaywallAction.SUPPRESS
+                else -> null
             }
         }
     }
@@ -74,11 +75,12 @@ class ModerationDecider(
             )
         ) ?: return Decision.Abstained("missing_jev_answer")
 
-        return policy.accept(raw).mapValue {
+        return policy.accept(raw).mapValueOrAbstain {
             when (it) {
                 "allow" -> ModerationAction.ALLOW
                 "review" -> ModerationAction.REVIEW
-                else -> ModerationAction.REJECT
+                "reject" -> ModerationAction.REJECT
+                else -> null
             }
         }
     }
@@ -116,11 +118,12 @@ class NotificationRouter(
             )
         ) ?: return Decision.Abstained("missing_jev_answer")
 
-        return policy.accept(raw).mapValue {
+        return policy.accept(raw).mapValueOrAbstain {
             when (it) {
                 "deliver" -> NotificationAction.DELIVER
                 "digest" -> NotificationAction.DIGEST
-                else -> NotificationAction.SUPPRESS
+                "suppress" -> NotificationAction.SUPPRESS
+                else -> null
             }
         }
     }
@@ -179,23 +182,31 @@ class SemanticReranker(
         }.toMap()
 
         val response = jev.evaluate(state, questions)
-        return candidates.mapIndexedNotNull { index, candidate ->
-            val raw = response.score("fit_" + index) ?: return@mapIndexedNotNull null
-
-            when (val decision: Decision<Int> = policy.accept(raw)) {
-                is Decision.Accepted<Int> -> RankedCandidate(
-                    candidate = candidate,
-                    score = decision.value,
-                    confidence = decision.confidence,
-                    status = RankingStatus.RANKED
-                )
-                is Decision.Abstained -> RankedCandidate(
+        return candidates.mapIndexed { index, candidate ->
+            val raw = response.score("fit_" + index)
+            when {
+                raw == null -> RankedCandidate(
                     candidate = candidate,
                     score = null,
-                    confidence = decision.confidence ?: 0.0,
+                    confidence = 0.0,
                     status = RankingStatus.ABSTAINED,
-                    abstainReason = decision.reason
+                    abstainReason = "missing_jev_answer"
                 )
+                else -> when (val decision: Decision<Int> = policy.accept(raw)) {
+                    is Decision.Accepted<Int> -> RankedCandidate(
+                        candidate = candidate,
+                        score = decision.value,
+                        confidence = decision.confidence,
+                        status = RankingStatus.RANKED
+                    )
+                    is Decision.Abstained -> RankedCandidate(
+                        candidate = candidate,
+                        score = null,
+                        confidence = decision.confidence ?: 0.0,
+                        status = RankingStatus.ABSTAINED,
+                        abstainReason = decision.reason
+                    )
+                }
             }
         }.sortedWith(
             compareByDescending<RankedCandidate> { it.score != null }
@@ -219,7 +230,10 @@ class VerificationDecider(
     }
 }
 
-private inline fun <T, R> Decision<T>.mapValue(transform: (T) -> R): Decision<R> = when (this) {
-    is Decision.Accepted -> Decision.Accepted(transform(value), confidence)
+private inline fun <T, R> Decision<T>.mapValueOrAbstain(transform: (T) -> R?): Decision<R> = when (this) {
+    is Decision.Accepted -> {
+        transform(value)?.let { Decision.Accepted(it, confidence) }
+            ?: Decision.Abstained("unexpected_jev_choice", confidence)
+    }
     is Decision.Abstained -> this
 }
