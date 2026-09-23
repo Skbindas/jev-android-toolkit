@@ -1,0 +1,26 @@
+# Gradle
+.gradle/
+**/build/
+!**/src/**/build/
+
+# Android / IntelliJ
+.idea/
+*.iml
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated
+.kotlin/
