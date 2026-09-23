@@ -114,11 +114,13 @@ The architecture was informed by public Jev Android/mobile projects and the `awe
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [API reference — 0.1.0](docs/api/0.1.0.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 - [Publishing and release readiness](docs/publishing.md)
 - [Backend authentication](docs/backend-auth.md)
 - [Integration fixtures](docs/integration-fixtures.md)
+- [Benchmark fixtures](docs/benchmark-fixtures.md)
 - [Hindi quick guide](docs/i18n/hi/README.md)
 
 ## Contributing
@@ -142,7 +144,7 @@ Never commit API keys, signing keys, backend credentials, or tokens. See [SECURI
 
 ## Project status
 
-The toolkit foundation is implemented with JVM tests, Android sample validation, static CodeQL analysis, dependency review, Maven publication smoke testing, and offline contract fixtures.
+The toolkit foundation is implemented with JVM tests, Android sample validation, static CodeQL analysis, dependency review, Maven publication smoke testing, offline contract fixtures, and a deterministic benchmark harness.
 
 ## License
 
