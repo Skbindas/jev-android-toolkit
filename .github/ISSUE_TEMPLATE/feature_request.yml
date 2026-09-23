@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose a new decision module or improvement
+title: "[feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem are you solving?
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision boundary
+      description: What should Jev decide, and what remains deterministic?
+    validations:
+      required: true
+  - type: textarea
+    id: fallback
+    attributes:
+      label: Fallback
+      description: What happens when confidence is low or the model is unavailable?
+    validations:
+      required: true
