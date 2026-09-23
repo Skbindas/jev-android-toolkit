@@ -14,6 +14,8 @@ Keep each pull request focused on one change. Every decision module should:
 6. Document inputs, output type, thresholds, and failure behavior.
 7. Include reproducible benchmark evidence when making performance claims.
 
+See the [contributor and issue triage playbook](docs/contributor-triage.md) for the expected fixture, review, benchmark, and issue-triage patterns.
+
 Substantial AI-assisted development is welcome. Disclose meaningful AI generation in the PR description so reviewers can reproduce and assess the work.
 
 ## Maintainer review gate
@@ -36,3 +38,5 @@ Run:
 
     gradle test
     gradle :sample:compose-playground:assembleDebug
+
+For changes to a public API, decision policy, transport, or build configuration, also run the most specific module tests and publication/fixture checks documented in the repository CI workflows.
