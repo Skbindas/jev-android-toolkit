@@ -29,9 +29,28 @@ class DecisionPolicyTest {
     }
 
     @Test
-    fun noul_has_an_explicit_binary_boundary() {
-        val policy = DecisionPolicy()
-        assertEquals(true, (policy.accept(NoulDecision(0.8)) as Decision.Accepted).value)
-        assertEquals(false, (policy.accept(NoulDecision(0.2)) as Decision.Accepted).value)
+    fun choice_uses_selected_probability_when_probabilities_are_present() {
+        val policy = DecisionPolicy(0.7, 0.05)
+
+        val abstained = policy.accept(
+            ChoiceDecision(
+                key = "show",
+                confidence = 0.99,
+                probabilities = mapOf("show" to 0.52, "defer" to 0.45, "suppress" to 0.03)
+            )
+        )
+
+        assertIs<Decision.Abstained>(abstained)
+    }
+
+    @Test
+    fun noul_abstains_when_probability_is_too_close_to_half() {
+        val policy = DecisionPolicy(0.7, 0.1)
+
+        val abstained = policy.accept(NoulDecision(0.51))
+        assertIs<Decision.Abstained>(abstained)
+
+        val accepted = policy.accept(NoulDecision(0.85))
+        assertEquals(true, (accepted as Decision.Accepted).value)
     }
 }
