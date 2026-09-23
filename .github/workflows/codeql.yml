@@ -19,8 +19,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.6.0"
+
       - uses: github/codeql-action/init@v4
         with:
-          languages: kotlin
-      - uses: github/codeql-action/autobuild@v4
+          languages: java-kotlin
+          build-mode: manual
+
+      - name: Build JVM and Android targets for CodeQL
+        run: gradle --no-daemon --no-build-cache -Dkotlin.compiler.execution.strategy=in-process clean :library:decision-core:classes :library:jev-client:classes :library:decision-modules:classes :sample:compose-playground:assembleDebug
+
       - uses: github/codeql-action/analyze@v4
