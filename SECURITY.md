@@ -14,4 +14,4 @@ The Android sample must not embed production secrets in the APK. Live Jev access
 
 ## Automated review
 
-Pull requests are checked with dependency review and repository CI. Security-sensitive changes should include a focused regression test.
+Pull requests are checked with repository CI. GitHub Dependency Review can be enabled after the repository Dependency Graph is enabled in Settings > Security analysis. Security-sensitive changes should include a focused regression test.
