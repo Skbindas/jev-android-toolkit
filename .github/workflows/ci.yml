@@ -76,7 +76,7 @@ jobs:
       - name: Publish all modules to local validation repositories
         run: gradle publish
       - name: Compile a clean published-artifact consumer
-        run: gradle -p examples/maven-consumer --offline build
+        run: gradle -p examples/maven-consumer build
 
   benchmark-fixture-smoke:
     name: Benchmark fixture smoke test
