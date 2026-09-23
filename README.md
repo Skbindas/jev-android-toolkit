@@ -46,7 +46,7 @@ For production Android apps, do not ship a long-lived server credential inside t
 
 ## Quick start
 
-Install JDK 17 and Gradle 9.1.0.
+Install JDK 17 and Gradle 9.6.0.
 
     gradle test
     gradle :sample:compose-playground:assembleDebug
@@ -81,7 +81,7 @@ AI-assisted development is welcome and substantial AI generation should be discl
 
 ## Project status
 
-The repository remains private during initial validation. It will be made public only after build, test, security, documentation, and sample checks pass.
+The initial implementation and CI validation are complete. Repository visibility is managed separately from the codebase.
 
 ## License
 
