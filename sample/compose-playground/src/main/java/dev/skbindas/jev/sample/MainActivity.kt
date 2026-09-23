@@ -195,7 +195,11 @@ private fun fakeClientFactory(
     responder: (dev.skbindas.jev.core.JevRequest) -> JevResponse
 ) = JevClient(JevTransport { request -> responder(request) })
 
-private fun <T> formatDecision(label: String, decision: Decision<T>): String = when (decision) {
-    is Decision.Accepted -> "$label: ${decision.value} confidence=${decision.confidence}",
-    is Decision.Abstained -> "$label: ABSTAINED reason=${decision.reason}",
+private fun <T> formatDecision(label: String, decision: Decision<T>): String {
+    return if (decision is Decision.Accepted<*>) {
+        "$label: ${decision.value} confidence=${decision.confidence}"
+    } else {
+        val abstained = decision as Decision.Abstained
+        "$label: ABSTAINED reason=${abstained.reason}"
+    }
 }
