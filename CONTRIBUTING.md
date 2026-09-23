@@ -30,7 +30,7 @@ Do not let a model directly execute shell commands, arbitrary coordinates, payme
 
 ## Local validation
 
-Install JDK 17 and Gradle 9.1.0.
+Install JDK 17 and Gradle 9.6.0.
 
 Run:
 
